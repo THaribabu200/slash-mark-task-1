@@ -1,0 +1,80 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Step 1: Load and Inspect the Data
+try:
+    data = pd.read_csv(r"C:\Users\harib\OneDrive\Desktop\task-1\weather_data.csv")
+    print("Data loaded successfully.")
+except Exception as e:
+    print("Error loading data:", e)
+    exit()
+
+# Step 2: Confirm Structure of Dataset
+print("\nFirst few rows of the dataset:\n", data.head())
+print("\nColumn names and data types:\n", data.dtypes)
+
+# Step 3: Convert Date_Time to DateTime
+data['Date_Time'] = pd.to_datetime(data['Date_Time'], errors='coerce')
+print("\nDate_Time column converted to datetime format.")
+
+# Step 4: Check for Missing Values
+print("\nMissing values in each column:\n", data.isna().sum())
+
+# Step 5: Summary Statistics for Numeric Columns
+print("\nSummary statistics of numeric columns:\n", data.describe())
+
+# Step 6: Plot Temperature Trend
+city = "New York"  # Change this to any location you want to analyze
+city_data = data[data["Location"] == city]
+
+if not city_data.empty:
+    plt.figure(figsize=(12, 6))
+    plt.plot(city_data["Date_Time"], city_data["Temperature_C"], label="Temperature (°C)", color="tomato")
+    plt.xlabel("Date")
+    plt.ylabel("Temperature (°C)")
+    plt.title(f"Temperature Trend Over Time in {city}")
+    plt.legend()
+    plt.show()
+else:
+    print(f"No data found for city: {city}")
+
+# Step 7: Plot Humidity, Precipitation, and Wind Speed for the Same City
+if not city_data.empty:
+    fig, axs = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
+    
+    # Humidity Plot
+    axs[0].plot(city_data["Date_Time"], city_data["Humidity_pct"], label="Humidity (%)", color="skyblue")
+    axs[0].set_ylabel("Humidity (%)")
+    axs[0].set_title(f"Humidity Trend in {city}")
+    axs[0].legend()
+    
+    # Precipitation Plot
+    axs[1].plot(city_data["Date_Time"], city_data["Precipitation_mm"], label="Precipitation (mm)", color="slateblue")
+    axs[1].set_ylabel("Precipitation (mm)")
+    axs[1].set_title(f"Precipitation Trend in {city}")
+    axs[1].legend()
+    
+    # Wind Speed Plot
+    axs[2].plot(city_data["Date_Time"], city_data["Wind_Speed_kmh"], label="Wind Speed (km/h)", color="darkgreen")
+    axs[2].set_xlabel("Date")
+    axs[2].set_ylabel("Wind Speed (km/h)")
+    axs[2].set_title(f"Wind Speed Trend in {city}")
+    axs[2].legend()
+    
+    plt.tight_layout()
+    plt.show()
+else:
+    print(f"No data found for city: {city}")
+
+# Step 8: Correlation Matrix of All Weather Variables
+try:
+    numeric_data = data[["Temperature_C", "Humidity_pct", "Precipitation_mm", "Wind_Speed_kmh"]]
+    correlation_matrix = numeric_data.corr()
+    
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", vmin=-1, vmax=1)
+    plt.title("Correlation Matrix of Weather Variables")
+    plt.show()
+except Exception as e:
+    print("Error generating correlation matrix:", e)
